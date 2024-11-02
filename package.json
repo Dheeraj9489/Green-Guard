@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "expo-image-picker": "^15.0.7",
+    "react-native-image-crop-picker": "^0.41.4",
+    "react-native-image-picker": "^7.1.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1"
+  }
+}
