@@ -7,6 +7,7 @@ import torch
 import torchvision.transforms as transforms
 from werkzeug.utils import secure_filename
 import os
+import subprocess
 
 
 app = Flask(__name__)
@@ -33,6 +34,9 @@ def magic_kernel_resize(input_filename, output_filename, target_size=(256,256), 
 
 # Image processing
 def preprocess_image(image_data):
+    subprocess.run([""])
+
+
     transform = transforms.Compose([
         transforms.Resize((256,256)),
         transforms.ToTensor(),
@@ -82,7 +86,7 @@ def upload_image():
         with Image.open(resized_image_path) as img:
             img.show()
 
-            # img_tensor = preprocess_image(img) # Preprocess image for AI
+            img_tensor = preprocess_image(img) # Preprocess image for AI
             # response = diagnosis(img_tensor) # Get response from AI
     except IOError as e:
         return jsonify({'error': f"IOError: {str(e)} - Check if the file is a valid image."}), 500
