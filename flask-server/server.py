@@ -1,3 +1,5 @@
+import time
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from PIL import Image
@@ -11,9 +13,9 @@ app = Flask(__name__)
 CORS(app)
 
 # Load AI model
-model_path = ''
-model = torch.load(model_path)
-model.eval()
+# model_path = ''
+# model = torch.load(model_path)
+# model.eval()
 
 # Image processing
 def preprocess_image(image_data):
@@ -30,48 +32,73 @@ def preprocess_image(image_data):
 
 @app.route('/upload', methods=['POST'])
 def upload_image():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image provided.'})
+
     # Read in arguments
     image = request.files['image']
 
-    # Handle no file upload
     if image.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+        return jsonify({'error': 'No selected file.'})
 
-    # Save uploaded image temp
+    # Image saving stuff
     filename = secure_filename(image.filename)
     image_path = os.path.join('uploads',filename)
+
+    os.makedirs('uploads', exist_ok=True)
+
     image.save(image_path)
 
-    # Open image
-    img = Image.open(image_path)
 
-    # Preprocess the image
-    img_tensor = preprocess_image(img)
+    print(f"Uploaded file type: {image.mimetype}")
 
-    # Contact AI model
-    response = diagnosis(img_tensor)
+    try:
+        file_size = os.path.getsize(image_path)
+        if file_size < 8:
+            return jsonify({'error': 'File too small.'}), 400
 
-    # Cleanup files
-    os.remove(image_path)
+        with Image.open(image_path) as img:
+            img.verify() # Closes the image for some ungodly reason.
+        with Image.open(image_path) as img:
+            img.show()
+            # img_tensor = preprocess_image(img) # Preprocess image for AI
+            # response = diagnosis(img_tensor) # Get response from AI
+    except IOError as e:
+        return jsonify({'error': f"IOError: {str(e)} - Check if the file is a valid image."}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-    return jsonify({response})
-
-
-
-def diagnosis(img_tensor):
-    with torch.no_grad():
-        prediction = model(img_tensor)
-
-    # Parse model output
-    model_output = prediction[0]
-    diagnosis = model_output.item() if isinstance(model_output, torch.Tensor) else model_output
-
-    # Json formatting
+    # Testing
     response = {
-        "diagnosis": diagnosis
+        "disease": "Dheeraj is too beautiful."
     }
 
-    return response
+    try:
+        time.sleep(0.5) # Resolve file concurrent access issues
+        os.remove(image_path)
+    except PermissionError:
+        return jsonify({"error":"Could not delete file. File may be in use,"}), 500
+    # Cleanup files
+
+
+    return jsonify(response), 200
+
+
+
+# def diagnosis(img_tensor):
+#     with torch.no_grad():
+#         prediction = model(img_tensor)
+#
+#     # Parse model output
+#     model_output = prediction[0]
+#     diagnosis = model_output.item() if isinstance(model_output, torch.Tensor) else model_output
+#
+#     # Json formatting
+#     response = {
+#         "diagnosis": diagnosis
+#     }
+#
+#     return response
 
 
 if __name__ == '__main__':
