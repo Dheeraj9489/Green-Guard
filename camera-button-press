@@ -1,0 +1,40 @@
+import React, { useEffect, useState } from 'react';
+import { Button, View, Alert } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { ImagePickerResult } from 'expo-image-picker';
+
+export default function UploadPhoto() {
+  // Define the state type as boolean | null
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      // Set the state with the correct type
+      setHasCameraPermission(status === 'granted');
+    })();
+  }, []);
+
+  const openCamera = async () => {
+    if (hasCameraPermission) {
+      const result: ImagePickerResult = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const uri = result.assets[0].uri; // Accessing the URI of the first asset
+        console.log(uri); // Use the URI as needed
+      }
+    } else {
+      Alert.alert('Camera permission is required!');
+    }
+  };
+
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Button title="Open Camera" onPress={openCamera} />
+    </View>
+  );
+}
