@@ -23,7 +23,7 @@ const ImageUploadComponent = () => {
   const uploadImage = async (imagePath: string) => {
     const formData = new FormData();
 
-    formData.append('file', {
+    formData.append('image', {
       uri: imagePath,
       name: 'upload.jpg',
       type: 'image/jpeg',
