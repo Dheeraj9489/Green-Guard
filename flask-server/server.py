@@ -10,13 +10,12 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-
 # Load AI model
 model_path = ''
 model = torch.load(model_path)
 model.eval()
 
-
+# Image processing
 def preprocess_image(image_data):
     transform = transforms.Compose([
         transforms.Resize((256,256)),
@@ -63,9 +62,11 @@ def diagnosis(img_tensor):
     with torch.no_grad():
         prediction = model(img_tensor)
 
+    # Parse model output
     model_output = prediction[0]
     diagnosis = model_output.item() if isinstance(model_output, torch.Tensor) else model_output
 
+    # Json formatting
     response = {
         "diagnosis": diagnosis
     }
