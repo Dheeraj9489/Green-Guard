@@ -2,7 +2,7 @@ import time
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from PIL import Image
+from PIL import Image, ImageFilter
 import torch
 import torchvision.transforms as transforms
 from werkzeug.utils import secure_filename
@@ -16,6 +16,20 @@ CORS(app)
 # model_path = ''
 # model = torch.load(model_path)
 # model.eval()
+
+
+def magic_kernel_resize(input_filename, output_filename, target_size=(256,256), extra_sharpening=0):
+    # open input
+    img = Image.open(input_filename)
+    # resize image
+    img = img.resize(target_size,Image.LANCZOS)
+    if extra_sharpening > 0:
+        sharpener = ImageFilter.UnsharpMask(radius=2,percent=extra_sharpening, threshold=3)
+        img = img.filter(sharpener)
+
+    # Save resized img
+    img.save(output_filename)
+
 
 # Image processing
 def preprocess_image(image_data):
@@ -44,11 +58,9 @@ def upload_image():
     # Image saving stuff
     filename = secure_filename(image.filename)
     image_path = os.path.join('uploads',filename)
-
     os.makedirs('uploads', exist_ok=True)
 
     image.save(image_path)
-
 
     print(f"Uploaded file type: {image.mimetype}")
 
@@ -57,10 +69,19 @@ def upload_image():
         if file_size < 8:
             return jsonify({'error': 'File too small.'}), 400
 
+        # With == os.remove works :)
         with Image.open(image_path) as img:
             img.verify() # Closes the image for some ungodly reason.
         with Image.open(image_path) as img:
             img.show()
+
+            new_size = (256,256)
+            resized_image_path = os.path.join('uploads', 'resized_'+filename)
+            magic_kernel_resize(image_path, resized_image_path, new_size, extra_sharpening=150)
+        # Resized image
+        with Image.open(resized_image_path) as img:
+            img.show()
+
             # img_tensor = preprocess_image(img) # Preprocess image for AI
             # response = diagnosis(img_tensor) # Get response from AI
     except IOError as e:
@@ -68,23 +89,25 @@ def upload_image():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-    # Testing
+    # Testing for before model is complete
     response = {
-        "disease": "Dheeraj is too beautiful."
+        "disease": "Dheeraj is wonderful."
     }
 
+    # Cleanup files
     try:
         time.sleep(0.5) # Resolve file concurrent access issues
         os.remove(image_path)
+        os.remove(resized_image_path)
     except PermissionError:
         return jsonify({"error":"Could not delete file. File may be in use,"}), 500
-    # Cleanup files
+
 
 
     return jsonify(response), 200
 
 
-
+# # Model code, uncomment when merge w/ feature-ml-model
 # def diagnosis(img_tensor):
 #     with torch.no_grad():
 #         prediction = model(img_tensor)
