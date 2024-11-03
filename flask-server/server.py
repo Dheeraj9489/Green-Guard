@@ -68,10 +68,8 @@ def report_disease():
     # Create a new report entry
     new_report = {
         'description': description,
-        'location': {
-            'latitude': latitude,
-            'longitude': longitude
-        }
+        'latitude': latitude,
+        'longitude': longitude
     }
 
     # Load existing reports
@@ -142,7 +140,8 @@ def upload_image():
 
     # Testing for before model is complete
     response = {
-        "disease": "Dheeraj is wonderful."
+        "plant": "Dheeraj",
+        "disease": "Sexiness."
     }
 
     # Cleanup files
