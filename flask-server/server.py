@@ -1,5 +1,6 @@
 import time
 
+import cv2
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from PIL import Image, ImageFilter
@@ -7,11 +8,19 @@ import torch
 import torchvision.transforms as transforms
 from werkzeug.utils import secure_filename
 import os
-import subprocess
-
+import json
 
 app = Flask(__name__)
 CORS(app)
+
+REPORTS_FILE = 'reports.json'
+
+# Ensure the reports file exists
+if not os.path.exists(REPORTS_FILE):
+    with open(REPORTS_FILE, 'w') as f:
+        json.dump([], f)  # Start with an empty list
+
+
 
 # Load AI model
 # model_path = ''
@@ -34,8 +43,6 @@ def magic_kernel_resize(input_filename, output_filename, target_size=(256,256), 
 
 # Image processing
 def preprocess_image(image_data):
-    subprocess.run([""])
-
 
     transform = transforms.Compose([
         transforms.Resize((256,256)),
@@ -46,6 +53,46 @@ def preprocess_image(image_data):
     img_tensor = transform(image_data)
     img_tensor = img_tensor.unsqueeze(0)
     return img_tensor
+
+@app.route('/report', methods=['POST'])
+def report_disease():
+    # Get submission from upload
+    description = request.form.get('description')
+    latitude = request.form.get('latitude')
+    longitude = request.form.get('longitude')
+
+    # Make sure its not empty
+    if not description or latitude is None or longitude is None:
+        return jsonify({'error': 'Description, latitude, and longitude are required.'}), 400
+
+    # Create a new report entry
+    new_report = {
+        'description': description,
+        'location': {
+            'latitude': latitude,
+            'longitude': longitude
+        }
+    }
+
+    # Load existing reports
+    with open(REPORTS_FILE, 'r') as f:
+        reports = json.load(f)
+
+    # Add the new report to the list
+    reports.append(new_report)
+
+    # Save back to the JSON file
+    with open(REPORTS_FILE, 'w') as f:
+        json.dump(reports, f)
+
+    return jsonify({'message': 'Report submitted successfully!'}), 201
+
+@app.route('/get_reports', methods=['GET'])
+def get_reports():
+    with open(REPORTS_FILE, 'r') as f:
+        reports = json.load(f)
+    return jsonify(reports), 200
+
 
 
 @app.route('/upload', methods=['POST'])
