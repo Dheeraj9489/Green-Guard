@@ -22,19 +22,22 @@ const ImageUploadComponent = () => {
 
   const uploadImage = async (imagePath: string) => {
     const formData = new FormData();
-    const response = await fetch(imagePath);
-    const blob = await response.blob();
 
-    formData.append('file', blob, 'upload.jpg');
+    formData.append('image', {
+      uri: imagePath,
+      name: 'upload.jpg',
+      type: 'image/jpeg',
+    } as any);
 
     try {
-      const response = await fetch('http://localhost:5000/upload', {
+      const response = await fetch('http://192.168.135.206:5001/upload', {
         method: 'POST',
         body: formData,
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Accept': 'application/json',
         },
       });
+
       const result = await response.json();
       console.log('Upload result:', result);
     } catch (error) {
