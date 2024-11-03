@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import { StyleSheet, View } from 'react-native';
 import * as Location from 'expo-location';
+// import { useFocusEffect }
 
 type MarkerData = {
-  description: string;
+  plant: string;
+  disease: string;
   latitude: number;
   longitude: number;
 };
@@ -33,13 +35,14 @@ export function MapInterface() {
   useEffect(() => {
     const fetchMarkers = async () => {
   try {
-    const response = await fetch('http://192.168.135.206:5001/get_reports'); // Adjust the URL
+    const response = await fetch('http://192.168.135.206:5001/get_reports'); // CHANGE WHEN SERVER CHANGES
     if (response.ok) {
       const data = await response.json();
 
       // Convert latitude and longitude to numbers
-      const formattedData = data.map((item: { description: string; latitude: string; longitude: string; }) => ({
-        description: item.description,
+      const formattedData = data.map((item: { plant: string; disease: string; latitude: string; longitude: string; }) => ({
+        plant: item.plant,
+        disease: item.disease,
         latitude: parseFloat(item.latitude),  // Convert to number
         longitude: parseFloat(item.longitude) // Convert to number
       }));
@@ -83,7 +86,8 @@ export function MapInterface() {
               latitude: marker.latitude,
               longitude: marker.longitude,
             }}
-            title={marker.description}
+            title={marker.plant}
+            description={marker.disease}
           />
         ))}
       </MapView>
