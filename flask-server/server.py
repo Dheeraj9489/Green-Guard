@@ -13,7 +13,7 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-REPORTS_FILE = '../../../Downloads/reports.json'
+REPORTS_FILE = 'reports.json'
 
 # Ensure the reports file exists
 if not os.path.exists(REPORTS_FILE):
