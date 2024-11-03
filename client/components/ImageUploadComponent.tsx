@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Button, Image, View } from 'react-native';
+import {ActivityIndicator, Button, Image, View, StyleSheet} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import ImageCropPicker from 'react-native-image-crop-picker';
 
 const ImageUploadComponent = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -30,6 +31,7 @@ const ImageUploadComponent = () => {
     } as any);
 
     try {
+      setLoading(true);
       const response = await fetch('http://192.168.135.206:5001/upload', {
         method: 'POST',
         body: formData,
@@ -40,17 +42,40 @@ const ImageUploadComponent = () => {
 
       const result = await response.json();
       console.log('Upload result:', result);
+      setLoading(false);
     } catch (error) {
       console.error('Error uploading image:', error);
     }
   };
 
   return (
-    <View>
-      <Button title="Pick an Image" onPress={pickImage} />
-      {imageUri && <Image source={{ uri: imageUri }} style={{ width: 256, height: 256 }} />}
+    <View style={styles.container}>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      ) : (
+        <>
+          <Button title="Pick an Image" onPress={pickImage} />
+          {imageUri && <Image source={{ uri: imageUri }} style={{ width: 256, height: 256 }} />}
+        </>
+      )}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  },
+});
 
 export default ImageUploadComponent;
