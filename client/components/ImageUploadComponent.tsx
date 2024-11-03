@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Button, Image, View, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router'; // Use expo-router for navigation
+import ImageCropPicker from 'react-native-image-crop-picker';
 
 const ImageUploadComponent = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
