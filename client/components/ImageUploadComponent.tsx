@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import {ActivityIndicator, Button, Image, View, StyleSheet} from 'react-native';
+import { ActivityIndicator, Button, Image, View, StyleSheet } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import ImageCropPicker from 'react-native-image-crop-picker';
+import { useRouter } from 'expo-router'; // Use expo-router for navigation
 
 const ImageUploadComponent = () => {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter(); // Initialize the router
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -43,8 +44,12 @@ const ImageUploadComponent = () => {
       const result = await response.json();
       console.log('Upload result:', result);
       setLoading(false);
+
+      // Navigate to the results page
+      router.push(`/results?plant=${encodeURIComponent(result.plant)}&disease=${encodeURIComponent(result.disease)}`); // Correctly navigate to the results tab
     } catch (error) {
       console.error('Error uploading image:', error);
+      setLoading(false);
     }
   };
 

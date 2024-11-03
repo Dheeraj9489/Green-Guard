@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
-import { StyleSheet, View } from 'react-native';
+import {ActivityIndicator, StyleSheet, View} from 'react-native';
 import * as Location from 'expo-location';
-// import { useFocusEffect }
+import { useFocusEffect } from '@react-navigation/native';
 
 type MarkerData = {
   plant: string;
@@ -14,6 +14,7 @@ type MarkerData = {
 export function MapInterface() {
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const requestLocationPermission = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -25,10 +26,12 @@ export function MapInterface() {
   };
 
   const getUserLocation = async () => {
-    const location = await Location.getCurrentPositionAsync({});
+    let location = await Location.getCurrentPositionAsync({});
+    const { latitude, longitude } = location.coords;
+    // const location = await Location.getCurrentPositionAsync({});
     setUserLocation({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
+      latitude: latitude,
+      longitude: longitude
     });
   };
 
@@ -62,18 +65,28 @@ export function MapInterface() {
       if (hasPermission) {
         await getUserLocation();
         await fetchMarkers();
+        setLoading(false);
       }
     };
 
     initializeMap();
   }, []);
 
+  if (loading){
+    return(
+        <View >
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+    );
+  }
+
+
   return (
     <View style={styles.container}>
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: userLocation ? userLocation.latitude : 38.945850, // Default to Mizzou
+          latitude: userLocation ? userLocation.latitude : 34.945850, // Default to Mizzou
           longitude: userLocation ? userLocation.longitude : -92.329531,
           latitudeDelta: 0.1,
           longitudeDelta: 0.1,
