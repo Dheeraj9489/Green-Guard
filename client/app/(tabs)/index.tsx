@@ -3,6 +3,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import { useRef, useState } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import ImageUploadComponent from '@/components/ImageUploadComponent';
 
 export default function Camera() {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -56,6 +57,7 @@ export default function Camera() {
           <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
             <AntDesign name='camera' size={44} color='black' />
           </TouchableOpacity>
+          <ImageUploadComponent />
         </View>
       </CameraView>
     </View>
