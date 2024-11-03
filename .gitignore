@@ -105,4 +105,4 @@ android/app/build/
 *.swp
 *.lock
 *.iml
-flask-server/*.pth
+flask-server/disease_detection.pth
