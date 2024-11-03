@@ -78,12 +78,14 @@ def magic_kernel_resize(input_filename, output_filename, target_size=(256,256), 
 @app.route('/report', methods=['POST'])
 def report_disease():
     # Get submission from upload
-    plant = request.form.get('plant')
-    disease = request.form.get('disease')
-    latitude = request.form.get('latitude')
-    longitude = request.form.get('longitude')
+    data = request.json
+    plant = data.get('plant')
+    disease = data.get('disease')
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
 
     # Make sure its not empty
+    print(f'plant: {plant}, disease: {disease}, latitude: {latitude}, longitude: {longitude}')
     if not plant or not disease or not latitude or not longitude:
         return jsonify({'error': 'Description, latitude, and longitude are required.'}), 400
 
